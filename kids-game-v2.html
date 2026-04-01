@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🌟 Bé Học Vui 2.0</title>
+<style>
+/* ============================================================
+   BIẾN MÀU & CẤU HÌNH GIAO DIỆN
+   ============================================================ */
+:root {
+  --pink:#FFB3C6; --pink2:#FF6B9D;
+  --yellow:#FFF3B0; --yellow2:#FFD166;
+  --blue:#BDE0FE; --blue2:#4CC9F0;
+  --green:#B7E4C7; --green2:#52B788;
+  --purple:#E2CCFF; --purple2:#9B72CF;
+  --orange:#FFDAB9; --orange2:#FF9A3C;
+  --bg:#FFF9F0;
+  --shadow:rgba(0,0,0,0.12);
+  --radius:24px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;min-height:100%;font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#FFF9F0,#FFF0FA,#F0F8FF);
+  overflow-x:hidden;user-select:none;-webkit-tap-highlight-color:transparent}
+
+/* ============================================================
+   MÀN HÌNH (SCREENS)
+   ============================================================ */
+.screen{display:none;flex-direction:column;align-items:center;
+  padding:14px;min-height:100vh;animation:fadeIn .4s ease}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ============================================================
+   THANH TRÊN (TOP BAR)
+   ============================================================ */
+.top-bar{width:100%;max-width:480px;display:flex;align-items:center;
+  justify-content:space-between;margin-bottom:6px;gap:6px}
+.icon-btn{background:#fff;border:none;border-radius:50%;width:46px;height:46px;
+  font-size:20px;cursor:pointer;box-shadow:0 4px 12px var(--shadow);
+  display:flex;align-items:center;justify-content:center;transition:transform .15s;flex-shrink:0}
+.icon-btn:active{transform:scale(.88)}
+.score-pill{font-size:16px;font-weight:800;color:#555;background:#fff;
+  border-radius:20px;padding:6px 14px;box-shadow:0 4px 12px var(--shadow);white-space:nowrap}
+
+/* ============================================================
+   THANH TIẾN TRÌNH (PROGRESS BAR)
+   ============================================================ */
+.prog-wrap{width:100%;max-width:420px;background:#eee;border-radius:20px;
+  height:14px;overflow:hidden;margin:4px 0 10px;box-shadow:inset 0 2px 4px rgba(0,0,0,.08)}
+.prog-bar{height:100%;border-radius:20px;transition:width .5s cubic-bezier(.4,2,.6,1);
+  background:linear-gradient(90deg,var(--pink2),var(--purple2),var(--blue2));
+  background-size:200% 100%;animation:progShift 2s linear infinite}
+@keyframes progShift{0%{background-position:0%}100%{background-position:200%}}
+
+/* ============================================================
+   MASCOT BUBBLE
+   ============================================================ */
+.mascot-wrap{display:flex;align-items:flex-end;gap:8px;width:100%;max-width:420px;
+  margin-bottom:8px;min-height:64px}
+.mascot-char{font-size:44px;flex-shrink:0;animation:mascotBob 2s ease-in-out infinite;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))}
+@keyframes mascotBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.mascot-bubble{background:#fff;border-radius:18px 18px 18px 4px;padding:10px 14px;
+  font-size:.9rem;font-weight:700;color:#555;box-shadow:0 4px 14px var(--shadow);
+  max-width:260px;line-height:1.4;transition:opacity .3s;animation:bubblePop .4s ease}
+@keyframes bubblePop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ============================================================
+   SPLASH / NHẬP TÊN
+   ============================================================ */
+#splashScreen{justify-content:center;gap:12px}
+.splash-logo{font-size:clamp(2rem,10vw,3.5rem);font-weight:900;text-align:center;
+  background:linear-gradient(135deg,var(--pink2),var(--purple2),var(--blue2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:titleBounce 2s ease-in-out infinite}
+@keyframes titleBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.splash-sub{font-size:1rem;color:#888;text-align:center}
+.splash-mascot{font-size:90px;animation:mascotBob 2.5s ease-in-out infinite;
+  filter:drop-shadow(0 8px 16px rgba(0,0,0,.15))}
+.name-input{border:3px solid var(--pink);border-radius:20px;padding:12px 20px;
+  font-size:1.1rem;font-weight:700;text-align:center;outline:none;width:100%;max-width:280px;
+  background:#fff;box-shadow:0 4px 12px var(--shadow);color:#444}
+.name-input:focus{border-color:var(--pink2);box-shadow:0 0 0 4px rgba(255,107,157,.2)}
+
+/* Chọn avatar */
+.avatar-label{font-size:.9rem;font-weight:700;color:#777;text-align:center}
+.avatar-grid{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.avatar-opt{font-size:36px;width:54px;height:54px;border-radius:50%;background:#fff;
+  border:3px solid #eee;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 10px var(--shadow);transition:all .2s}
+.avatar-opt.sel{border-color:var(--pink2);background:#FFF0F6;transform:scale(1.2);
+  box-shadow:0 0 0 4px rgba(255,107,157,.25)}
+.avatar-opt:active{transform:scale(.9)}
+
+/* Nút chính */
+.btn-main{border:none;border-radius:50px;padding:14px 40px;font-size:1.1rem;
+  font-weight:800;cursor:pointer;transition:transform .15s,box-shadow .15s;
+  box-shadow:0 6px 20px rgba(255,107,157,.4)}
+.btn-main:active{transform:scale(.93)}
+.btn-main.pink{background:linear-gradient(135deg,var(--pink2),var(--purple2));color:#fff}
+.btn-main.blue{background:linear-gradient(135deg,var(--blue2),var(--purple2));color:#fff;
+  box-shadow:0 6px 20px rgba(76,201,240,.4)}
+.btn-main.green{background:linear-gradient(135deg,var(--green2),var(--blue2));color:#fff;
+  box-shadow:0 6px 20px rgba(82,183,136,.4)}
+.btn-main:disabled{opacity:.4;cursor:default}
+
+/* ============================================================
+   HOME SCREEN
+   ============================================================ */
+#homeScreen{justify-content:flex-start;padding-top:20px}
+.home-header{width:100%;max-width:480px;display:flex;align-items:center;
+  justify-content:space-between;margin-bottom:12px}
+.player-chip{display:flex;align-items:center;gap:8px;background:#fff;
+  border-radius:50px;padding:8px 16px;box-shadow:0 4px 12px var(--shadow)}
+.player-chip .av{font-size:24px}
+.player-chip .nm{font-size:.9rem;font-weight:800;color:#444}
+.audio-btns{display:flex;gap:6px}
+
+/* Level selector */
+.level-bar{width:100%;max-width:420px;background:#fff;border-radius:20px;
+  padding:12px 16px;box-shadow:0 4px 16px var(--shadow);margin-bottom:16px}
+.level-title{font-size:.85rem;font-weight:700;color:#888;margin-bottom:8px}
+.level-tabs{display:flex;gap:6px}
+.level-tab{flex:1;padding:8px 4px;border:2px solid #eee;border-radius:12px;
+  font-size:.8rem;font-weight:800;cursor:pointer;text-align:center;
+  background:#f8f8f8;color:#888;transition:all .2s}
+.level-tab.active{border-color:var(--pink2);background:linear-gradient(135deg,#FFE8F3,#F3E8FF);
+  color:var(--pink2)}
+.level-tab:active{transform:scale(.93)}
+
+/* Game cards */
+.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;
+  width:100%;max-width:420px;margin-bottom:14px}
+.game-card{background:#fff;border-radius:var(--radius);padding:18px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;
+  box-shadow:0 6px 20px var(--shadow);transition:transform .2s,box-shadow .2s;
+  border:3px solid transparent;position:relative;overflow:hidden}
+.game-card::before{content:'';position:absolute;top:-30px;right:-30px;width:80px;
+  height:80px;border-radius:50%;opacity:.12}
+.game-card:nth-child(1){border-color:var(--pink);background:linear-gradient(135deg,#fff,#FFF0F6)}
+.game-card:nth-child(1)::before{background:var(--pink2)}
+.game-card:nth-child(2){border-color:var(--blue);background:linear-gradient(135deg,#fff,#F0F8FF)}
+.game-card:nth-child(2)::before{background:var(--blue2)}
+.game-card:nth-child(3){border-color:var(--green);background:linear-gradient(135deg,#fff,#F0FFF4)}
+.game-card:nth-child(3)::before{background:var(--green2)}
+.game-card:nth-child(4){border-color:var(--yellow);background:linear-gradient(135deg,#fff,#FFFFF0)}
+.game-card:nth-child(4)::before{background:var(--yellow2)}
+.game-card:active{transform:scale(.94)}
+.game-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px var(--shadow)}
+.gc-icon{font-size:48px}.gc-name{font-size:.9rem;font-weight:800;color:#444;text-align:center}
+.gc-stars{font-size:16px;letter-spacing:1px}
+.gc-lock{position:absolute;top:8px;right:10px;font-size:18px}
+
+/* Quick play btn */
+.quick-play{width:100%;max-width:420px;background:linear-gradient(135deg,var(--yellow2),var(--orange2));
+  border:none;border-radius:var(--radius);padding:16px;font-size:1.1rem;font-weight:800;
+  color:#fff;cursor:pointer;box-shadow:0 6px 20px rgba(255,154,60,.4);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .15s;margin-bottom:12px}
+.quick-play:active{transform:scale(.95)}
+
+/* Collection btn */
+.collection-btn{display:flex;align-items:center;gap:6px;background:#fff;
+  border:none;border-radius:50px;padding:10px 20px;font-size:.9rem;font-weight:700;
+  color:#888;cursor:pointer;box-shadow:0 4px 12px var(--shadow);transition:transform .15s}
+.collection-btn:active{transform:scale(.93)}
+
+/* ============================================================
+   GAME COMMON
+   ============================================================ */
+.game-title{font-size:1.3rem;font-weight:900;color:#444;text-align:center;margin:4px 0 2px}
+
+/* Feedback */
+.fb{font-size:1.4rem;font-weight:900;text-align:center;min-height:46px;padding:8px 18px;
+  border-radius:18px;margin:8px 0;transition:all .3s}
+.fb.correct{background:#DCFCE7;color:#16A34A;animation:fbPop .4s ease}
+.fb.wrong{background:#FEF2F2;color:#DC2626;animation:fbPop .4s ease}
+.fb.hint{background:#FFF9C4;color:#B45309;animation:fbPop .4s ease}
+.fb.empty{opacity:0}
+@keyframes fbPop{from{transform:scale(.6)}70%{transform:scale(1.12)}to{transform:scale(1)}}
+
+/* Next btn */
+.btn-next{background:linear-gradient(135deg,var(--pink2),var(--purple2));color:#fff;
+  border:none;border-radius:50px;padding:13px 36px;font-size:1rem;font-weight:800;
+  cursor:pointer;box-shadow:0 6px 20px rgba(255,107,157,.4);transition:transform .15s;
+  margin-top:8px}
+.btn-next:active{transform:scale(.93)}
+.btn-next:disabled{opacity:.4;cursor:default}
+
+/* ============================================================
+   GAME 1 – NHẬN BIẾT HÌNH
+   ============================================================ */
+.g1-target{background:#fff;border-radius:var(--radius);padding:16px 24px;
+  font-size:clamp(60px,17vw,84px);text-align:center;box-shadow:0 8px 24px var(--shadow);
+  margin-bottom:18px;animation:popIn .5s cubic-bezier(.36,1.56,.64,1)}
+.g1-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px}
+.g1-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.choice-btn{background:#fff;border:3px solid #eee;border-radius:18px;padding:16px;
+  font-size:clamp(40px,11vw,56px);text-align:center;cursor:pointer;
+  box-shadow:0 4px 12px var(--shadow);transition:transform .15s,border-color .2s;
+  position:relative}
+.choice-btn:active{transform:scale(.87)}
+.choice-btn.ok{border-color:var(--green2)!important;background:#DCFCE7!important;
+  box-shadow:0 0 0 4px #86EFAC!important}
+.choice-btn.no{border-color:#EF4444!important;background:#FEF2F2!important;animation:shake .4s}
+.choice-btn.hint-glow{animation:hintPulse 1s ease infinite}
+@keyframes hintPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,214,0,.6)}
+  50%{box-shadow:0 0 0 8px rgba(255,214,0,.3)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px) rotate(-2deg)}
+  75%{transform:translateX(7px) rotate(2deg)}}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ============================================================
+   GAME 2 – MEMORY CARDS
+   ============================================================ */
+.mem-grid{display:grid;gap:8px;width:100%;max-width:380px;justify-content:center}
+.mem-card{aspect-ratio:1;border-radius:14px;cursor:pointer;perspective:600px;position:relative}
+.card-inner{width:100%;height:100%;transform-style:preserve-3d;
+  transition:transform .45s cubic-bezier(.4,2,.6,1);border-radius:14px}
+.mem-card.flipped .card-inner{transform:rotateY(180deg)}
+.card-f,.card-b{position:absolute;width:100%;height:100%;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;backface-visibility:hidden;
+  -webkit-backface-visibility:hidden}
+.card-f{background:linear-gradient(135deg,#A78BFA,#60A5FA);font-size:1.1rem;
+  font-weight:900;color:rgba(255,255,255,.7);box-shadow:0 4px 10px rgba(167,139,250,.4)}
+.card-b{transform:rotateY(180deg);background:#fff;border:3px solid #eee;
+  font-size:clamp(22px,6vw,34px);box-shadow:0 4px 10px var(--shadow)}
+.mem-card.matched .card-b{background:#DCFCE7;border-color:var(--green2);
+  animation:matchPop .5s cubic-bezier(.36,1.56,.64,1)}
+@keyframes matchPop{0%{transform:rotateY(180deg) scale(.8)}100%{transform:rotateY(180deg) scale(1)}}
+.mem-stats{font-size:.85rem;color:#888;font-weight:700;margin:4px 0 8px;text-align:center}
+
+/* ============================================================
+   GAME 3 – ĐẾM SỐ
+   ============================================================ */
+.count-box{background:#fff;border-radius:var(--radius);padding:18px;width:100%;
+  max-width:380px;min-height:110px;display:flex;flex-wrap:wrap;gap:6px;
+  justify-content:center;align-items:center;box-shadow:0 8px 24px var(--shadow);margin-bottom:18px}
+.ci{font-size:clamp(28px,8vw,40px);animation:cPop .3s cubic-bezier(.36,1.56,.64,1) backwards}
+@keyframes cPop{from{transform:scale(0) rotate(-15deg)}to{transform:scale(1) rotate(0)}}
+.num-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:100%;max-width:370px}
+.num-btn{background:#fff;border:3px solid #eee;border-radius:14px;padding:10px 4px;
+  font-size:1.3rem;font-weight:900;color:#444;cursor:pointer;
+  box-shadow:0 4px 10px var(--shadow);transition:transform .15s}
+.num-btn:active{transform:scale(.84)}
+.num-btn.ok{background:#DCFCE7!important;border-color:var(--green2)!important;color:#16A34A!important}
+.num-btn.no{background:#FEF2F2!important;border-color:#EF4444!important;animation:shake .4s}
+
+/* ============================================================
+   GAME 4 – MÀU SẮC
+   ============================================================ */
+.color-ball{width:130px;height:130px;border-radius:50%;margin:10px auto 18px;
+  box-shadow:0 8px 28px rgba(0,0,0,.2);animation:popIn .5s cubic-bezier(.36,1.56,.64,1);
+  position:relative;overflow:hidden}
+.color-ball::after{content:'';position:absolute;top:12px;left:18px;width:28px;
+  height:18px;border-radius:50%;background:rgba(255,255,255,.38);transform:rotate(-30deg)}
+.color-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px}
+.color-opts.cols3{grid-template-columns:1fr 1fr 1fr}
+.color-btn-g{border:3px solid #eee;border-radius:18px;padding:18px 10px;font-size:.95rem;
+  font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.3);cursor:pointer;
+  box-shadow:0 4px 12px var(--shadow);transition:transform .15s}
+.color-btn-g:active{transform:scale(.87)}
+.color-btn-g.ok{outline:5px solid #22C55E;box-shadow:0 0 0 8px rgba(34,197,94,.25)}
+.color-btn-g.no{animation:shake .4s;opacity:.65}
+
+/* ============================================================
+   LEVEL END SCREEN
+   ============================================================ */
+#levelEndScreen{justify-content:center;text-align:center;gap:10px}
+.chest-wrap{font-size:90px;cursor:pointer;animation:chestBounce .6s ease-in-out infinite;
+  filter:drop-shadow(0 8px 20px rgba(0,0,0,.2));transition:font-size .3s}
+.chest-wrap.open{animation:chestOpen .5s cubic-bezier(.36,1.56,.64,1) forwards;font-size:120px}
+@keyframes chestBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes chestOpen{0%{transform:scale(1)}50%{transform:scale(1.3) rotate(-5deg)}
+  100%{transform:scale(1.1)}}
+.le-title{font-size:1.8rem;font-weight:900;color:#444}
+.le-subtitle{font-size:1rem;color:#888}
+.le-stars{font-size:44px;letter-spacing:4px;animation:starSpin .6s ease backwards}
+@keyframes starSpin{from{transform:rotate(-180deg) scale(0);opacity:0}to{transform:none;opacity:1}}
+.new-sticker-box{background:#fff;border-radius:var(--radius);padding:16px 24px;
+  box-shadow:0 6px 20px var(--shadow);max-width:280px;width:100%}
+.ns-label{font-size:.8rem;font-weight:700;color:#888;margin-bottom:6px}
+.ns-emoji{font-size:56px;animation:popIn .6s cubic-bezier(.36,1.56,.64,1) .3s backwards}
+.ns-name{font-size:1rem;font-weight:800;color:#444;margin-top:4px}
+.le-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* ============================================================
+   COLLECTION SCREEN
+   ============================================================ */
+#collectionScreen{padding-top:16px}
+.coll-title{font-size:1.4rem;font-weight:900;color:#444;text-align:center;margin:8px 0}
+.coll-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+  width:100%;max-width:420px;padding:4px}
+.stk-cell{background:#fff;border-radius:16px;aspect-ratio:1;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  box-shadow:0 4px 12px var(--shadow);position:relative;overflow:hidden;transition:transform .2s}
+.stk-cell:active{transform:scale(.93)}
+.stk-cell .se{font-size:clamp(24px,7vw,34px)}
+.stk-cell .sn{font-size:clamp(.45rem,.9vw+.2rem,.65rem);font-weight:700;color:#888;
+  text-align:center;line-height:1.2;padding:0 2px}
+.stk-cell.locked{filter:grayscale(1) opacity(.35)}
+.stk-cell.locked::after{content:'🔒';position:absolute;font-size:20px}
+.stk-cell.new-unlocked{animation:stkNew .6s cubic-bezier(.36,1.56,.64,1)}
+@keyframes stkNew{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* ============================================================
+   BREAK SCREEN (OVERLAY)
+   ============================================================ */
+#breakOverlay{position:fixed;inset:0;background:rgba(255,249,240,.92);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  z-index:999;gap:12px;backdrop-filter:blur(6px)}
+#breakOverlay.show{display:flex}
+.break-mascot{font-size:90px;animation:mascotBob 2s ease-in-out infinite}
+.break-title{font-size:1.6rem;font-weight:900;color:#444;text-align:center}
+.break-sub{font-size:1rem;color:#888;text-align:center;max-width:280px;line-height:1.4}
+.break-eyes{font-size:3rem;animation:blinkEyes 2s ease-in-out infinite}
+@keyframes blinkEyes{0%,90%,100%{opacity:1}95%{opacity:0}}
+
+/* ============================================================
+   HIỆU ỨNG (EFFECTS)
+   ============================================================ */
+.confetti-p{position:fixed;pointer-events:none;animation:cFall linear forwards;z-index:998}
+@keyframes cFall{0%{transform:translateY(-40px) rotate(0deg);opacity:1}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.star-fly{position:fixed;font-size:30px;pointer-events:none;
+  animation:sFly .9s ease-out forwards;z-index:997}
+@keyframes sFly{0%{transform:scale(0) translateY(0);opacity:1}
+  60%{transform:scale(1.5) translateY(-40px);opacity:1}
+  100%{transform:scale(.4) translateY(-90px);opacity:0}}
+.shake-screen{animation:scrShake .4s ease}
+@keyframes scrShake{0%,100%{transform:none}20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:360px){
+  .game-grid{gap:10px}.avatar-opt{width:46px;height:46px;font-size:28px}
+  .coll-grid{grid-template-columns:repeat(4,1fr);gap:8px}
+}
+@media(min-height:700px){#splashScreen{padding-top:28px}}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     BREAK OVERLAY (phủ lên tất cả)
+     ============================================================ -->
+<div id="breakOverlay">
+  <div class="break-mascot" id="breakMascotChar">🐰</div>
+  <div class="break-title">Nghỉ một chút nhé! 😊</div>
+  <div class="break-eyes">😴</div>
+  <div class="break-sub">Bé đã chơi được một lúc rồi!<br>Hãy nhắm mắt nghỉ vài giây nhé 🌸</div>
+  <button class="btn-main pink" onclick="dismissBreak()">✅ Bé nghỉ rồi, chơi tiếp!</button>
+</div>
+
+<!-- ============================================================
+     1. SPLASH / NHẬP TÊN BÉ
+     ============================================================ -->
+<div id="splashScreen" class="screen active">
+  <div class="splash-mascot" id="splashAvi">🐰</div>
+  <div class="splash-logo">Bé Học Vui!</div>
+  <div class="splash-sub">Trò chơi thông minh cho bé yêu 🌟</div>
+
+  <input class="name-input" id="nameInput" type="text"
+    placeholder="Tên bé là gì? 😊" maxlength="12"
+    oninput="document.getElementById('splashAvi').textContent=
+      ['🐰','🐱','🐻','🦊','🐼'][Math.floor(Math.random()*5)]">
+
+  <div class="avatar-label">Chọn nhân vật yêu thích nhé!</div>
+  <div class="avatar-grid" id="avatarGrid"></div>
+
+  <button class="btn-main pink" onclick="startApp()" style="margin-top:8px">
+    🚀 Bắt đầu chơi!
+  </button>
+  <div style="font-size:.8rem;color:#bbb;text-align:center">
+    Không cần đăng nhập · Không có quảng cáo ❤️
+  </div>
+</div>
+
+<!-- ============================================================
+     2. HOME SCREEN
+     ============================================================ -->
+<div id="homeScreen" class="screen">
+  <!-- Header -->
+  <div class="home-header">
+    <div class="player-chip">
+      <div class="av" id="hpAv">🐰</div>
+      <div class="nm" id="hpName">Bé</div>
+    </div>
+    <div class="audio-btns">
+      <button class="icon-btn" id="bgmBtn" onclick="toggleBGM()" title="Nhạc nền">🎵</button>
+      <button class="icon-btn" id="sfxBtn" onclick="toggleSFX()" title="Âm thanh">🔊</button>
+    </div>
+  </div>
+
+  <!-- Mascot bubble -->
+  <div class="mascot-wrap">
+    <div class="mascot-char" id="homeMascot">🐰</div>
+    <div class="mascot-bubble" id="homeBubble">Hôm nay mình chơi gì nhỉ? 🎮</div>
+  </div>
+
+  <!-- Chọn level -->
+  <div class="level-bar">
+    <div class="level-title">⚡ Chọn cấp độ</div>
+    <div class="level-tabs" id="levelTabs"></div>
+  </div>
+
+  <!-- Game cards -->
+  <div class="game-grid" id="gameGrid">
+    <div class="game-card" onclick="launchGame(1)">
+      <div class="gc-icon">🔷</div>
+      <div class="gc-name">Nhận biết hình</div>
+      <div class="gc-stars" id="hStars1">⬜⬜⬜</div>
+    </div>
+    <div class="game-card" onclick="launchGame(2)">
+      <div class="gc-icon">🃏</div>
+      <div class="gc-name">Ghép cặp</div>
+      <div class="gc-stars" id="hStars2">⬜⬜⬜</div>
+    </div>
+    <div class="game-card" onclick="launchGame(3)">
+      <div class="gc-icon">🔢</div>
+      <div class="gc-name">Đếm số</div>
+      <div class="gc-stars" id="hStars3">⬜⬜⬜</div>
+    </div>
+    <div class="game-card" onclick="launchGame(4)">
+      <div class="gc-icon">🎨</div>
+      <div class="gc-name">Màu sắc</div>
+      <div class="gc-stars" id="hStars4">⬜⬜⬜</div>
+    </div>
+  </div>
+
+  <!-- Quick Play -->
+  <button class="quick-play" onclick="quickPlay()">
+    ⚡ Quick Play – Chơi ngay!
+  </button>
+
+  <!-- Collection -->
+  <button class="collection-btn" onclick="showCollection()">
+    🏆 Bộ sưu tập sticker
+    <span id="collBadge" style="background:var(--pink2);color:#fff;border-radius:50%;
+      width:22px;height:22px;font-size:.75rem;font-weight:800;
+      display:flex;align-items:center;justify-content:center">0</span>
+  </button>
+</div>
+
+<!-- ============================================================
+     3. GAME 1 – NHẬN BIẾT HÌNH
+     ============================================================ -->
+<div id="game1Screen" class="screen">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="goHome()">←</button>
+    <div class="score-pill" id="g1Sc">⭐ 0</div>
+    <button class="icon-btn" onclick="toggleSFX()">🔊</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-bar" id="g1Prog" style="width:0%"></div></div>
+  <div class="mascot-wrap">
+    <div class="mascot-char" id="g1Mas">🐰</div>
+    <div class="mascot-bubble" id="g1Bub">Chọn hình giống mẫu nhé! 👀</div>
+  </div>
+  <div class="game-title">🔷 Hình nào giống nhau?</div>
+  <div class="g1-target" id="g1Target">🐶</div>
+  <div class="g1-grid" id="g1Grid"></div>
+  <div class="fb empty" id="g1Fb"></div>
+  <button class="btn-next" id="g1Next" onclick="nextQ(1)" disabled>Tiếp theo ▶</button>
+</div>
+
+<!-- ============================================================
+     4. GAME 2 – MEMORY CARDS
+     ============================================================ -->
+<div id="game2Screen" class="screen">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="goHome()">←</button>
+    <div class="score-pill" id="g2Sc">⭐ 0</div>
+    <button class="icon-btn" onclick="toggleSFX()">🔊</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-bar" id="g2Prog" style="width:0%"></div></div>
+  <div class="mascot-wrap">
+    <div class="mascot-char" id="g2Mas">🐰</div>
+    <div class="mascot-bubble" id="g2Bub">Lật thẻ tìm cặp nhé! 🧠</div>
+  </div>
+  <div class="game-title">🃏 Ghép cặp giống nhau!</div>
+  <div class="mem-stats" id="memStats">0 / 0 cặp tìm được</div>
+  <div class="mem-grid" id="memGrid"></div>
+  <div class="fb empty" id="g2Fb"></div>
+</div>
+
+<!-- ============================================================
+     5. GAME 3 – ĐẾM SỐ
+     ============================================================ -->
+<div id="game3Screen" class="screen">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="goHome()">←</button>
+    <div class="score-pill" id="g3Sc">⭐ 0</div>
+    <button class="icon-btn" onclick="toggleSFX()">🔊</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-bar" id="g3Prog" style="width:0%"></div></div>
+  <div class="mascot-wrap">
+    <div class="mascot-char" id="g3Mas">🐰</div>
+    <div class="mascot-bubble" id="g3Bub">Đếm xem có bao nhiêu nhé! 🔢</div>
+  </div>
+  <div class="game-title">🔢 Có bao nhiêu cái?</div>
+  <div class="count-box" id="countBox"></div>
+  <div class="num-grid" id="numGrid"></div>
+  <div class="fb empty" id="g3Fb"></div>
+  <button class="btn-next" id="g3Next" onclick="nextQ(3)" disabled>Tiếp theo ▶</button>
+</div>
+
+<!-- ============================================================
+     6. GAME 4 – MÀU SẮC
+     ============================================================ -->
+<div id="game4Screen" class="screen">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="goHome()">←</button>
+    <div class="score-pill" id="g4Sc">⭐ 0</div>
+    <button class="icon-btn" onclick="toggleSFX()">🔊</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-bar" id="g4Prog" style="width:0%"></div></div>
+  <div class="mascot-wrap">
+    <div class="mascot-char" id="g4Mas">🐰</div>
+    <div class="mascot-bubble" id="g4Bub">Đây là màu gì vậy? 🎨</div>
+  </div>
+  <div class="game-title">🎨 Màu sắc là gì?</div>
+  <div class="color-ball" id="colorBall"></div>
+  <div class="color-opts" id="colorOpts"></div>
+  <div class="fb empty" id="g4Fb"></div>
+  <button class="btn-next" id="g4Next" onclick="nextQ(4)" disabled>Tiếp theo ▶</button>
+</div>
+
+<!-- ============================================================
+     7. LEVEL END SCREEN
+     ============================================================ -->
+<div id="levelEndScreen" class="screen">
+  <div class="top-bar" style="justify-content:flex-end">
+    <button class="icon-btn" onclick="toggleSFX()">🔊</button>
+  </div>
+  <div class="chest-wrap" id="chestEl" onclick="openChest()">📦</div>
+  <div class="le-title" id="leTitle">Màn chơi hoàn thành!</div>
+  <div style="font-size:.9rem;color:#aaa" id="leTap">👆 Bấm vào rương để mở quà!</div>
+  <div class="le-stars" id="leStars">⭐⭐⭐</div>
+  <div class="new-sticker-box" id="stickerReveal" style="display:none">
+    <div class="ns-label">🎁 Sticker mới mở khóa!</div>
+    <div class="ns-emoji" id="nsEmoji">⭐</div>
+    <div class="ns-name" id="nsName">Ngôi sao</div>
+  </div>
+  <div class="le-btns">
+    <button class="btn-main green" onclick="replayGame()">🔄 Chơi lại</button>
+    <button class="btn-main pink" onclick="goHome()">🏠 Về nhà</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     8. COLLECTION SCREEN
+     ============================================================ -->
+<div id="collectionScreen" class="screen">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="goHome()">←</button>
+    <div class="score-pill">🏆 Sưu tập</div>
+    <div style="width:46px"></div>
+  </div>
+  <div class="mascot-wrap">
+    <div class="mascot-char" id="collMas">🐰</div>
+    <div class="mascot-bubble">Đây là kho sticker của bé! ✨</div>
+  </div>
+  <div class="coll-title">Bộ sưu tập của bé</div>
+  <div style="font-size:.85rem;color:#aaa;margin-bottom:10px" id="collCount">0 / 0 sticker</div>
+  <div class="coll-grid" id="collGrid"></div>
+</div>
+
+<script>
+/* ============================================================
+   MODULE 1: CẤU HÌNH & DỮ LIỆU TĨNH
+   ============================================================ */
+
+// Các nhân vật mascot
+const AVATARS = ['🐰','🐱','🐻','🦊','🐼','🦄','🐸','🐮'];
+
+// Cấu hình từng cấp độ
+const LVL = {
+  1:{rounds:4, opts:4, pairs:4, maxCount:5,  name:'Cấp 1', color:'#4CC9F0'},
+  2:{rounds:5, opts:4, pairs:6, maxCount:7,  name:'Cấp 2', color:'#52B788'},
+  3:{rounds:6, opts:4, pairs:8, maxCount:9,  name:'Cấp 3', color:'#FFD166'},
+  4:{rounds:6, opts:5, pairs:10,maxCount:10, name:'Cấp 4', color:'#FF9A3C'},
+  5:{rounds:7, opts:6, pairs:12,maxCount:10, name:'Cấp 5', color:'#EF4444'},
+};
+
+// Dữ liệu Game 1 – câu hỏi nhận biết hình
+const G1_DATA = [
+  {t:'🐶',o:['🐶','🐱','🐸','🐰']}, {t:'🌸',o:['🌟','🌸','🌺','🌼']},
+  {t:'🍎',o:['🍊','🍋','🍎','🍇']}, {t:'🚗',o:['🚕','✈️','🚗','🚢']},
+  {t:'⭐',o:['🌙','⭐','☀️','❤️']}, {t:'🦋',o:['🐝','🦋','🐞','🦄']},
+  {t:'🏠',o:['🏰','🏠','⛺','🏢']}, {t:'🎈',o:['🎁','🎈','🎆','🎠']},
+  {t:'🐸',o:['🐸','🐢','🦎','🐊']}, {t:'🍕',o:['🍔','🍕','🌮','🥪']},
+  {t:'🚀',o:['🛸','🚁','🚀','✈️']}, {t:'🌈',o:['🌈','🌦️','⛅','🌤️']},
+];
+
+// Dữ liệu Game 2 – emoji cho memory
+const MEM_POOL = ['🐶','🐱','🐻','🦊','🐸','🦄','🐼','🐨','🦋','🐝','🌸','⭐'];
+
+// Dữ liệu Game 3 – emoji dùng để đếm
+const COUNT_EMO = ['🍎','🌟','🐱','🌸','🎈','🦋','🐸','⭐','🍭','🎁','🚀','💎'];
+
+// Dữ liệu Game 4 – màu sắc
+const COLORS = [
+  {n:'Đỏ',     h:'#EF4444'}, {n:'Xanh lá', h:'#22C55E'},
+  {n:'Xanh dương',h:'#3B82F6'},{n:'Vàng',  h:'#EAB308'},
+  {n:'Hồng',   h:'#EC4899'}, {n:'Tím',   h:'#8B5CF6'},
+  {n:'Cam',    h:'#F97316'}, {n:'Nâu',   h:'#92400E'},
+  {n:'Xanh ngọc',h:'#06B6D4'},{n:'Đỏ tươi',h:'#E11D48'},
+];
+
+// Sticker collection – 24 sticker
+const ALL_STICKERS = [
+  {id:'s_bunny', e:'🐰', n:'Thỏ bông'},      {id:'s_cat',  e:'🐱', n:'Mèo mướp'},
+  {id:'s_bear',  e:'🐻', n:'Gấu nâu'},       {id:'s_fox',  e:'🦊', n:'Cáo đỏ'},
+  {id:'s_panda', e:'🐼', n:'Gấu trúc'},      {id:'s_uni',  e:'🦄', n:'Kỳ lân'},
+  {id:'s_frog',  e:'🐸', n:'Ếch xanh'},      {id:'s_bee',  e:'🐝', n:'Ong vàng'},
+  {id:'s_butter',e:'🦋', n:'Bướm xinh'},     {id:'s_star', e:'⭐', n:'Ngôi sao'},
+  {id:'s_heart', e:'❤️', n:'Trái tim'},      {id:'s_flower',e:'🌸', n:'Hoa đào'},
+  {id:'s_rainbow',e:'🌈',n:'Cầu vồng'},      {id:'s_dia',  e:'💎', n:'Kim cương'},
+  {id:'s_crown', e:'👑', n:'Vương miện'},    {id:'s_trophy',e:'🏆',n:'Cúp vàng'},
+  {id:'s_100',   e:'💯', n:'Hoàn hảo'},      {id:'s_fire', e:'🔥', n:'Bốc lửa'},
+  {id:'s_magic', e:'✨', n:'Phép màu'},      {id:'s_cake', e:'🎂', n:'Bánh sinh nhật'},
+  {id:'s_rocket',e:'🚀', n:'Tên lửa'},      {id:'s_medal',e:'🥇', n:'Huy chương'},
+  {id:'s_moon',  e:'🌙', n:'Mặt trăng'},    {id:'s_sun',  e:'☀️', n:'Mặt trời'},
+];
+
+// Map: game+performance → sticker id
+const STICKER_MAP = {
+  'g1_done':'s_bunny', 'g1_3star':'s_star',
+  'g2_done':'s_cat',   'g2_3star':'s_100',
+  'g3_done':'s_bear',  'g3_3star':'s_trophy',
+  'g4_done':'s_rainbow','g4_3star':'s_crown',
+  'lvl2':'s_heart',   'lvl3':'s_diamond','lvl4':'s_fire',  'lvl5':'s_magic',
+  'perfect':'s_medal', 'streak5':'s_rocket',
+};
+
+// Lời thoại mascot
+const LINES = {
+  greet:  ['Hôm nay chơi gì nhỉ? 🎮','Bé đã sẵn sàng chưa? 😄','Cùng học vui nào! 🌟'],
+  correct:['Giỏi quá! 🌟','Đúng rồi! 🎉','Tuyệt vời! ✨','Xuất sắc! 🏆','Chuẩn luôn! 🎊'],
+  wrong:  ['Thử lại nhé! 💪','Cố lên! 🌈','Gần đúng rồi! 🤗','Không sao đâu! 😊'],
+  hint:   ['Psst! Nhìn kỹ hơn nào... 🔍','Gợi ý: hãy so sánh màu sắc! 🎨'],
+  streak: ['Wow, bé đang chơi cực hay! ⚡','Liên tiếp đúng! Tuyệt quá! 🔥'],
+  break:  ['Bé nghỉ mắt một chút nhé! 😴'],
+  level:  ['Level mới, thú vị hơn rồi! 🚀','Cấp này khó hơn đó! Cố lên! 💪'],
+};
+const rand = arr => arr[Math.floor(Math.random()*arr.length)];
+const shuffle = arr => [...arr].sort(()=>Math.random()-.5);
+
+/* ============================================================
+   MODULE 2: STATE TOÀN CỤC
+   ============================================================ */
+const S = {
+  // Người chơi
+  name:'Bé', avatar:'🐰',
+  // Cấp độ hiện tại
+  level: 1,
+  // Điểm sao từng game (mỗi level lưu riêng)
+  stars: {}, // key: 'g1_l1' → {stars:3}
+  // Sticker đã mở khóa
+  unlocked: [],
+  // Game đang chơi
+  curGame: 0,
+  // Trạng thái adaptive
+  consCorrect:0, consWrong:0,
+  // Âm thanh
+  sfx:true, bgm:true,
+  // Session timer
+  sessionStart: null,
+  breakShown: false,
+  breakTimer: null,
+  // Sticker mới nhất (cho màn level end)
+  latestSticker: null,
+  // Quick play
+  lastGame: 0,
+};
+
+/* ============================================================
+   MODULE 3: LOCAL STORAGE
+   ============================================================ */
+function saveData() {
+  try {
+    localStorage.setItem('bhv2_player', JSON.stringify({
+      name:S.name, avatar:S.avatar, level:S.level,
+      stars:S.stars, unlocked:S.unlocked,
+      sfx:S.sfx, bgm:S.bgm,
+    }));
+  } catch(e){}
+}
+
+function loadData() {
+  try {
+    const d = JSON.parse(localStorage.getItem('bhv2_player')||'{}');
+    if(d.name)     S.name     = d.name;
+    if(d.avatar)   S.avatar   = d.avatar;
+    if(d.level)    S.level    = d.level;
+    if(d.stars)    S.stars    = d.stars;
+    if(d.unlocked) S.unlocked = d.unlocked;
+    if(d.sfx!==undefined) S.sfx = d.sfx;
+    if(d.bgm!==undefined) S.bgm = d.bgm;
+  } catch(e){}
+}
+
+// Lấy sao game+level
+function getStars(g, l) { return (S.stars[`g${g}_l${l}`]||{stars:0}).stars; }
+function setStars(g, l, s) {
+  const key = `g${g}_l${l}`;
+  if(!S.stars[key]||S.stars[key].stars<s) S.stars[key]={stars:s};
+}
+
+/* ============================================================
+   MODULE 4: ÂM THANH (Web Audio API)
+   ============================================================ */
+let audioCtx=null, bgmTimer=null, bgmPlaying=false;
+
+function getCtx() {
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// Phát 1 nốt nhạc đơn
+function tone(freq, dur, type='sine', vol=.28) {
+  if(!S.sfx) return;
+  try {
+    const c=getCtx(), o=c.createOscillator(), g=c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.frequency.value=freq; o.type=type;
+    g.gain.setValueAtTime(vol,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);
+    o.start(c.currentTime); o.stop(c.currentTime+dur);
+  } catch(e){}
+}
+
+// Bộ âm thanh sự kiện
+const SFX = {
+  correct(){ tone(523,.1);setTimeout(()=>tone(659,.1),110);
+    setTimeout(()=>tone(784,.2),220);setTimeout(()=>tone(1047,.3),330); },
+  wrong()  { tone(330,.18,'sawtooth',.14);setTimeout(()=>tone(277,.28,'sawtooth',.1),190); },
+  match()  { [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>tone(f,.14),i*75)); },
+  finish() { const m=[523,659,784,659,784,1047];m.forEach((f,i)=>setTimeout(()=>tone(f,.18),i*110)); },
+  click()  { tone(440,.08,'triangle',.2); },
+  chest()  { [392,523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,.15),i*90)); },
+  unlock() { [784,1047,1319,1568].forEach((f,i)=>setTimeout(()=>tone(f,.2),i*80)); },
+};
+
+// Nhạc nền pentatonic loop
+function startBGM() {
+  if(!S.bgm||bgmPlaying) return;
+  bgmPlaying=true;
+  const notes=[261,293,329,392,440,392,329,293,261,329,440,392];
+  let i=0;
+  function next(){
+    if(!S.bgm){bgmPlaying=false;return;}
+    const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type='sine';o.frequency.value=notes[i%notes.length];
+    g.gain.setValueAtTime(.07,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.38);
+    o.start();o.stop(c.currentTime+.38);
+    i++;bgmTimer=setTimeout(next,440);
+  }
+  bgmTimer=setTimeout(next,200);
+}
+
+function stopBGM() {
+  bgmPlaying=false;
+  clearTimeout(bgmTimer);
+}
+
+function toggleBGM() {
+  S.bgm=!S.bgm;
+  document.getElementById('bgmBtn').textContent=S.bgm?'🎵':'🔕';
+  S.bgm ? startBGM() : stopBGM();
+  saveData();
+}
+
+function toggleSFX() {
+  S.sfx=!S.sfx;
+  document.querySelectorAll('#sfxBtn,.icon-btn:last-child').forEach(b=>{
+    if(b.onclick&&b.onclick.toString().includes('SFX')||b.id==='sfxBtn')
+      b.textContent=S.sfx?'🔊':'🔇';
+  });
+  // Update all sfx buttons
+  document.querySelectorAll('[onclick="toggleSFX()"]').forEach(b=>{
+    b.textContent=S.sfx?'🔊':'🔇';
+  });
+  saveData();
+}
+
+// Text-to-Speech
+function speak(txt) {
+  if(!S.sfx||!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang='vi-VN'; u.rate=.88; u.pitch=1.3;
+  window.speechSynthesis.speak(u);
+}
+
+/* ============================================================
+   MODULE 5: HIỆU ỨNG TRỰC QUAN
+   ============================================================ */
+function confetti(n=20) {
+  const cls=['#FFB3C6','#FFD166','#4CC9F0','#52B788','#9B72CF','#FF9A3C'];
+  for(let i=0;i<n;i++){
+    const el=document.createElement('div');
+    el.className='confetti-p';
+    const sz=6+Math.random()*10;
+    el.style.cssText=`left:${Math.random()*100}vw;top:0;
+      width:${sz}px;height:${sz}px;
+      background:${cls[i%cls.length]};
+      border-radius:${Math.random()>.5?'50%':'3px'};
+      animation-duration:${1.5+Math.random()*2}s;
+      animation-delay:${Math.random()*.5}s`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),3000);
+  }
+}
+
+function starBurst(x,y) {
+  const el=document.createElement('div');
+  el.className='star-fly';
+  el.textContent='⭐';
+  el.style.left=x+'px';el.style.top=y+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1000);
+}
+
+function screenShake() {
+  // Rung thiết bị (mobile)
+  if(navigator.vibrate) navigator.vibrate(150);
+  document.body.classList.remove('shake-screen');
+  void document.body.offsetWidth; // reflow trick
+  document.body.classList.add('shake-screen');
+  setTimeout(()=>document.body.classList.remove('shake-screen'),500);
+}
+
+/* ============================================================
+   MODULE 6: MASCOT & DIALOG
+   ============================================================ */
+function mascotSay(screenId, text) {
+  const b=document.getElementById(screenId+'Bub');
+  if(!b) return;
+  b.style.opacity='0';
+  setTimeout(()=>{b.textContent=text;b.style.opacity='1';},200);
+}
+
+function setMascot(screenId, avi) {
+  const m=document.getElementById(screenId+'Mas')||document.getElementById(screenId+'Mascot');
+  if(m) m.textContent=avi;
+}
+
+/* ============================================================
+   MODULE 7: BREAK TIMER (nghỉ sau 3 phút)
+   ============================================================ */
+function startSessionTimer() {
+  S.sessionStart=Date.now();
+  S.breakShown=false;
+  clearInterval(S.breakTimer);
+  S.breakTimer=setInterval(()=>{
+    const elapsed=(Date.now()-S.sessionStart)/1000/60; // phút
+    if(elapsed>=3&&!S.breakShown){
+      S.breakShown=true;
+      showBreak();
+    }
+  },15000); // kiểm tra mỗi 15 giây
+}
+
+function showBreak() {
+  document.getElementById('breakMascotChar').textContent=S.avatar;
+  document.getElementById('breakOverlay').classList.add('show');
+  speak('Bé ơi, mình nghỉ một chút nhé! Mắt mỏi rồi!');
+}
+
+function dismissBreak() {
+  document.getElementById('breakOverlay').classList.remove('show');
+  S.sessionStart=Date.now(); // reset timer
+  S.breakShown=false;
+  SFX.click();
+}
+
+/* ============================================================
+   MODULE 8: ADAPTIVE DIFFICULTY
+   ============================================================ */
+// Khi trả lời đúng/sai, cập nhật adaptive state
+function onCorrect() {
+  S.consCorrect++;
+  S.consWrong=0;
+  if(S.consCorrect>=5) {
+    // Gợi ý tăng cấp
+    if(S.level<5 && S.consCorrect===5) {
+      mascotSay('g'+S.curGame, rand(LINES.streak));
+      speak('Bé đang chơi cực hay!');
+    }
+  }
+}
+
+function onWrong(feedbackId, correctSelector, hintDelay=1500) {
+  S.consWrong++;
+  S.consCorrect=0;
+  // Nếu sai 3 lần liên tiếp → gợi ý
+  if(S.consWrong>=3) {
+    setTimeout(()=>{
+      const fb=document.getElementById(feedbackId);
+      if(fb&&fb.textContent&&!fb.textContent.includes('Psst')) {
+        fb.textContent=rand(LINES.hint);
+        fb.className='fb hint';
+        // Highlight đáp án đúng
+        const el=document.querySelector(correctSelector);
+        if(el) el.classList.add('hint-glow');
+      }
+    }, hintDelay);
+    mascotSay('g'+S.curGame, rand(LINES.hint));
+  }
+}
+
+/* ============================================================
+   MODULE 9: STICKER SYSTEM
+   ============================================================ */
+function unlockSticker(id) {
+  if(!id||S.unlocked.includes(id)) return null;
+  S.unlocked.push(id);
+  const stk=ALL_STICKERS.find(s=>s.id===id);
+  S.latestSticker=stk;
+  saveData();
+  return stk;
+}
+
+function calcStars(wrongs, total) {
+  if(wrongs===0)          return 3;
+  if(wrongs<=total*.3)   return 2;
+  return 1;
+}
+
+function renderCollection() {
+  const grid=document.getElementById('collGrid');
+  grid.innerHTML=ALL_STICKERS.map(s=>{
+    const isUnlocked=S.unlocked.includes(s.id);
+    return `<div class="stk-cell ${isUnlocked?'':'locked'}" title="${s.n}">
+      <div class="se">${s.e}</div>
+      <div class="sn">${s.n}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('collCount').textContent=
+    `${S.unlocked.length} / ${ALL_STICKERS.length} sticker`;
+  document.getElementById('collBadge').textContent=S.unlocked.length;
+}
+
+/* ============================================================
+   MODULE 10: LEVEL & HOME
+   ============================================================ */
+function renderLevelTabs() {
+  const tabs=document.getElementById('levelTabs');
+  tabs.innerHTML=[1,2,3,4,5].map(l=>`
+    <div class="level-tab ${l===S.level?'active':''}" onclick="selectLevel(${l})"
+      style="${l===S.level?`border-color:${LVL[l].color};color:${LVL[l].color}`:''}">
+      ${LVL[l].name}
+    </div>`).join('');
+}
+
+function selectLevel(l) {
+  S.level=l; SFX.click(); renderLevelTabs(); renderHomeStars();
+  mascotSay('home', rand(LINES.level));
+  saveData();
+}
+
+function renderHomeStars() {
+  for(let g=1;g<=4;g++){
+    const s=getStars(g,S.level);
+    document.getElementById('hStars'+g).textContent=
+      (s>=1?'⭐':'⬜')+(s>=2?'⭐':'⬜')+(s>=3?'⭐':'⬜');
+  }
+  document.getElementById('collBadge').textContent=S.unlocked.length;
+}
+
+/* ============================================================
+   MODULE 11: NAVIGATION
+   ============================================================ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome() {
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  clearInterval(S.breakTimer);
+  renderHomeStars(); renderLevelTabs();
+  setMascot('home', S.avatar);
+  mascotSay('home', rand(LINES.greet).replace('{{name}}', S.name));
+  showScreen('homeScreen');
+  if(S.bgm) startBGM();
+}
+
+function showCollection() {
+  SFX.click(); renderCollection();
+  setMascot('coll', S.avatar);
+  showScreen('collectionScreen');
+}
+
+/* ============================================================
+   MODULE 12: GAME 1 – NHẬN BIẾT HÌNH
+   ============================================================ */
+let G1={};
+
+function initG1() {
+  const cfg=LVL[S.level];
+  G1={
+    rounds: shuffle(G1_DATA).slice(0,cfg.rounds),
+    idx:0, score:0, wrongs:0, answered:false,
+    opts: cfg.opts,
+  };
+  S.consCorrect=0; S.consWrong=0;
+  renderG1();
+}
+
+function renderG1() {
+  const r=G1.rounds[G1.idx], prog=((G1.idx)/G1.rounds.length*100);
+  document.getElementById('g1Prog').style.width=prog+'%';
+  document.getElementById('g1Sc').textContent='⭐ '+G1.score;
+  document.getElementById('g1Target').textContent=r.t;
+  document.getElementById('g1Fb').className='fb empty';
+  document.getElementById('g1Fb').textContent='';
+  document.getElementById('g1Next').disabled=true;
+  G1.answered=false;
+
+  // Tạo các lựa chọn (thêm bẫy nếu cấp cao)
+  let opts=r.o;
+  if(G1.opts>4) {
+    // Thêm hình tương tự dễ nhầm
+    const extra=['🔶','🔸','🔹','🔺','🔻'];
+    opts=[...r.o,...extra.slice(0,G1.opts-4)];
+  }
+  const shown=shuffle(opts).slice(0,G1.opts);
+  if(!shown.includes(r.t)) { shown[0]=r.t; }
+  const shuffled=shuffle(shown);
+
+  const grid=document.getElementById('g1Grid');
+  grid.className=`g1-grid${G1.opts>=5?' cols3':''}`;
+  grid.innerHTML=shuffled.map(opt=>
+    `<div class="choice-btn" onclick="answerG1('${opt}',this)">${opt}</div>`
+  ).join('');
+
+  setMascot('g1',S.avatar);
+  setTimeout(()=>speak('Chọn hình giống mẫu nhé!'),300);
+}
+
+function answerG1(val, el) {
+  if(G1.answered) return;
+  G1.answered=true;
+  const correct=G1.rounds[G1.idx].t;
+  const fb=document.getElementById('g1Fb');
+
+  document.querySelectorAll('.g1-grid .choice-btn').forEach(b=>{
+    if(b.textContent===correct) b.classList.add('ok');
+  });
+
+  if(val===correct) {
+    el.classList.add('ok');
+    G1.score++; onCorrect();
+    fb.textContent=rand(LINES.correct); fb.className='fb correct';
+    SFX.correct(); speak(rand(['Giỏi quá!','Đúng rồi!']));
+    confetti(14); starBurst(el.getBoundingClientRect().left+30,el.getBoundingClientRect().top);
+    mascotSay('g1', rand(LINES.correct));
+  } else {
+    el.classList.add('no'); G1.wrongs++;
+    fb.textContent=rand(LINES.wrong); fb.className='fb wrong';
+    SFX.wrong(); screenShake();
+    mascotSay('g1', rand(LINES.wrong));
+    onWrong('g1Fb','.g1-grid .choice-btn.ok');
+  }
+  document.getElementById('g1Sc').textContent='⭐ '+G1.score;
+  document.getElementById('g1Next').disabled=false;
+}
+
+/* ============================================================
+   MODULE 13: GAME 2 – MEMORY CARDS
+   ============================================================ */
+let G2={};
+
+function initG2() {
+  const pairs=LVL[S.level].pairs;
+  const emojis=shuffle(MEM_POOL).slice(0,pairs);
+  const cards=shuffle([...emojis,...emojis]).map((e,i)=>({
+    id:i,emoji:e,flipped:false,matched:false
+  }));
+  G2={cards,flipped:[],matched:0,total:pairs,score:0,wrongs:0,locked:false};
+  S.consCorrect=0; S.consWrong=0;
+  document.getElementById('g2Sc').textContent='⭐ 0';
+  document.getElementById('g2Fb').className='fb empty';
+  document.getElementById('g2Fb').textContent='';
+  document.getElementById('g2Prog').style.width='0%';
+  renderG2();
+  setMascot('g2',S.avatar);
+  setTimeout(()=>speak('Lật thẻ tìm cặp giống nhau nhé!'),300);
+}
+
+function renderG2() {
+  const pairs=G2.total;
+  // Số cột dựa trên số cặp
+  const cols=pairs<=4?4:pairs<=6?4:pairs<=8?4:4;
+  const grid=document.getElementById('memGrid');
+  grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+  // Kích thước thẻ theo số lượng
+  const sz=pairs<=4?72:pairs<=6?64:pairs<=8?56:pairs<=10?50:44;
+  grid.style.width=(sz*cols+8*(cols-1))+'px';
+
+  grid.innerHTML=G2.cards.map((c,i)=>`
+    <div class="mem-card${c.flipped?' flipped':''}${c.matched?' matched':''}"
+         id="mc${i}" onclick="flipCard(${i})"
+         style="width:${sz}px;height:${sz}px">
+      <div class="card-inner">
+        <div class="card-f" style="font-size:${sz*.35}px">❓</div>
+        <div class="card-b" style="font-size:${sz*.52}px">${c.emoji}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('memStats').textContent=
+    `${G2.matched} / ${G2.total} cặp tìm được`;
+}
+
+function flipCard(idx) {
+  const s=G2;
+  if(s.locked||s.cards[idx].flipped||s.cards[idx].matched) return;
+  s.cards[idx].flipped=true;
+  document.getElementById('mc'+idx).classList.add('flipped');
+  SFX.click(); s.flipped.push(idx);
+
+  if(s.flipped.length===2) {
+    s.locked=true;
+    const [a,b]=s.flipped;
+    const fb=document.getElementById('g2Fb');
+
+    if(s.cards[a].emoji===s.cards[b].emoji) {
+      // Khớp!
+      setTimeout(()=>{
+        s.cards[a].matched=s.cards[b].matched=true;
+        document.getElementById('mc'+a).classList.add('matched');
+        document.getElementById('mc'+b).classList.add('matched');
+        s.matched++; s.score++; s.flipped=[]; s.locked=false;
+        onCorrect();
+        const pct=(s.matched/s.total*100);
+        document.getElementById('g2Prog').style.width=pct+'%';
+        document.getElementById('g2Sc').textContent='⭐ '+s.score;
+        document.getElementById('memStats').textContent=
+          `${s.matched} / ${s.total} cặp tìm được`;
+        fb.textContent=rand(LINES.correct); fb.className='fb correct';
+        SFX.match(); mascotSay('g2',rand(LINES.correct));
+        confetti(10);
+        if(s.matched===s.total) setTimeout(()=>endGame(2,s.score,s.total,s.wrongs),800);
+      },400);
+    } else {
+      // Không khớp
+      s.wrongs++;
+      setTimeout(()=>{
+        s.cards[a].flipped=s.cards[b].flipped=false;
+        document.getElementById('mc'+a).classList.remove('flipped');
+        document.getElementById('mc'+b).classList.remove('flipped');
+        s.flipped=[]; s.locked=false;
+        fb.textContent=rand(LINES.wrong); fb.className='fb wrong';
+        SFX.wrong(); screenShake();
+        mascotSay('g2',rand(LINES.wrong));
+        onWrong('g2Fb','',0);
+      },900);
+    }
+  }
+}
+
+/* ============================================================
+   MODULE 14: GAME 3 – ĐẾM SỐ
+   ============================================================ */
+let G3={};
+
+function buildG3Rounds(cfg) {
+  const max=cfg.maxCount;
+  const nums=shuffle(Array.from({length:max},(_,i)=>i+1)).slice(0,cfg.rounds);
+  return nums.map(n=>({n, emoji:rand(COUNT_EMO)}));
+}
+
+function initG3() {
+  const cfg=LVL[S.level];
+  G3={rounds:buildG3Rounds(cfg),idx:0,score:0,wrongs:0,answered:false,total:cfg.maxCount};
+  S.consCorrect=0; S.consWrong=0;
+  // Tạo nút số
+  const ng=document.getElementById('numGrid');
+  ng.innerHTML=Array.from({length:10},(_,i)=>i+1).map(n=>
+    `<div class="num-btn" id="nb${n}" onclick="answerG3(${n},this)">${n}</div>`
+  ).join('');
+  renderG3();
+}
+
+function renderG3() {
+  const r=G3.rounds[G3.idx];
+  document.getElementById('g3Prog').style.width=(G3.idx/G3.rounds.length*100)+'%';
+  document.getElementById('g3Sc').textContent='⭐ '+G3.score;
+  document.getElementById('g3Fb').className='fb empty';
+  document.getElementById('g3Fb').textContent='';
+  document.getElementById('g3Next').disabled=true;
+  G3.answered=false;
+
+  // Hiển thị emoji
+  const box=document.getElementById('countBox');
+  box.innerHTML=Array.from({length:r.n},(_,i)=>
+    `<span class="ci" style="animation-delay:${i*55}ms">${r.emoji}</span>`
+  ).join('');
+
+  // Reset màu nút số
+  document.querySelectorAll('.num-btn').forEach(b=>b.className='num-btn');
+  setMascot('g3',S.avatar);
+  setTimeout(()=>speak('Đếm xem có bao nhiêu nhé!'),300);
+}
+
+function answerG3(val, el) {
+  if(G3.answered) return;
+  G3.answered=true;
+  const correct=G3.rounds[G3.idx].n;
+  const fb=document.getElementById('g3Fb');
+  document.getElementById('nb'+correct).classList.add('ok');
+
+  if(val===correct) {
+    G3.score++; onCorrect();
+    fb.textContent=rand(LINES.correct); fb.className='fb correct';
+    SFX.correct(); speak(rand(['Đúng rồi!','Giỏi quá!']));
+    confetti(14); starBurst(el.getBoundingClientRect().left+20,el.getBoundingClientRect().top);
+    mascotSay('g3',rand(LINES.correct));
+  } else {
+    el.classList.add('no'); G3.wrongs++;
+    fb.textContent=rand(LINES.wrong); fb.className='fb wrong';
+    SFX.wrong(); screenShake();
+    mascotSay('g3',rand(LINES.wrong));
+    onWrong('g3Fb','#nb'+correct);
+  }
+  document.getElementById('g3Sc').textContent='⭐ '+G3.score;
+  document.getElementById('g3Next').disabled=false;
+}
+
+/* ============================================================
+   MODULE 15: GAME 4 – MÀU SẮC
+   ============================================================ */
+let G4={};
+
+function buildG4Rounds(cfg) {
+  const pool=shuffle(COLORS).slice(0,Math.min(cfg.opts+2,COLORS.length));
+  const picks=shuffle(pool).slice(0,cfg.rounds);
+  return picks.map(c=>{
+    const wrongs=shuffle(COLORS.filter(x=>x.n!==c.n)).slice(0,cfg.opts-1);
+    return {correct:c, opts:shuffle([c,...wrongs])};
+  });
+}
+
+function initG4() {
+  const cfg=LVL[S.level];
+  G4={rounds:buildG4Rounds(cfg),idx:0,score:0,wrongs:0,answered:false,opts:cfg.opts};
+  S.consCorrect=0; S.consWrong=0;
+  renderG4();
+}
+
+function renderG4() {
+  const r=G4.rounds[G4.idx];
+  document.getElementById('g4Prog').style.width=(G4.idx/G4.rounds.length*100)+'%';
+  document.getElementById('g4Sc').textContent='⭐ '+G4.score;
+  document.getElementById('g4Fb').className='fb empty';
+  document.getElementById('g4Fb').textContent='';
+  document.getElementById('g4Next').disabled=true;
+  G4.answered=false;
+  document.getElementById('colorBall').style.background=r.correct.h;
+
+  const wrap=document.getElementById('colorOpts');
+  wrap.className=`color-opts${G4.opts>=5?' cols3':''}`;
+  wrap.innerHTML=r.opts.map(c=>
+    `<div class="color-btn-g" style="background:${c.h}"
+      onclick="answerG4('${c.n}',this,'${c.h}')">${c.n}</div>`
+  ).join('');
+
+  setMascot('g4',S.avatar);
+  setTimeout(()=>speak('Đây là màu gì? Chọn đúng nhé!'),300);
+}
+
+function answerG4(name, el) {
+  if(G4.answered) return;
+  G4.answered=true;
+  const correct=G4.rounds[G4.idx].correct;
+  const fb=document.getElementById('g4Fb');
+
+  document.querySelectorAll('.color-btn-g').forEach(b=>{
+    if(b.textContent===correct.n) b.classList.add('ok');
+  });
+
+  if(name===correct.n) {
+    G4.score++; onCorrect();
+    fb.textContent=rand(LINES.correct); fb.className='fb correct';
+    SFX.correct(); speak('Màu '+correct.n+'! Giỏi quá!');
+    confetti(14); starBurst(el.getBoundingClientRect().left+30,el.getBoundingClientRect().top);
+    mascotSay('g4',rand(LINES.correct));
+  } else {
+    el.classList.add('no'); G4.wrongs++;
+    fb.textContent=rand(LINES.wrong); fb.className='fb wrong';
+    SFX.wrong(); screenShake();
+    mascotSay('g4',rand(LINES.wrong));
+    onWrong('g4Fb','.color-btn-g.ok');
+  }
+  document.getElementById('g4Sc').textContent='⭐ '+G4.score;
+  document.getElementById('g4Next').disabled=false;
+}
+
+/* ============================================================
+   MODULE 16: NEXT QUESTION (dùng chung)
+   ============================================================ */
+function nextQ(g) {
+  SFX.click();
+  if(g===1) {
+    G1.idx++;
+    G1.idx>=G1.rounds.length ? endGame(1,G1.score,G1.rounds.length,G1.wrongs) : renderG1();
+  } else if(g===3) {
+    G3.idx++;
+    G3.idx>=G3.rounds.length ? endGame(3,G3.score,G3.rounds.length,G3.wrongs) : renderG3();
+  } else if(g===4) {
+    G4.idx++;
+    G4.idx>=G4.rounds.length ? endGame(4,G4.score,G4.rounds.length,G4.wrongs) : renderG4();
+  }
+}
+
+/* ============================================================
+   MODULE 17: KẾT THÚC GAME & PHẦN THƯỞNG
+   ============================================================ */
+function endGame(g, score, total, wrongs) {
+  const stars=calcStars(wrongs,total);
+  setStars(g,S.level,stars);
+  SFX.finish(); confetti(35);
+  speak(['Xuất sắc lắm!','Giỏi quá bé ơi!','Tuyệt vời!'][stars-1]);
+
+  // Tính sticker sẽ mở khóa
+  const stkId=STICKER_MAP['g'+g+'_done'];
+  const starStkId=stars===3?STICKER_MAP['g'+g+'_3star']:null;
+  const lvlStkId=STICKER_MAP['lvl'+S.level];
+  const perfStkId=wrongs===0?'s_100':null;
+
+  const newStk = unlockSticker(stkId) ||
+                 unlockSticker(starStkId) ||
+                 unlockSticker(lvlStkId) ||
+                 unlockSticker(perfStkId);
+
+  saveData();
+
+  // Hiển thị màn level end
+  document.getElementById('leTitle').textContent=
+    stars===3?'🏆 Hoàn hảo tuyệt đối!':stars===2?'🌟 Bé chơi giỏi lắm!':'😊 Cố lên nhé bé!';
+  document.getElementById('leStars').textContent=
+    '⭐'.repeat(stars)+'⬜'.repeat(3-stars);
+
+  // Rương quà
+  const chest=document.getElementById('chestEl');
+  chest.textContent='📦'; chest.classList.remove('open');
+  document.getElementById('leTap').style.display='block';
+  document.getElementById('stickerReveal').style.display='none';
+  S.latestSticker=newStk;
+  S.lastGame=g;
+
+  showScreen('levelEndScreen');
+}
+
+// Khi bấm mở rương
+function openChest() {
+  const chest=document.getElementById('chestEl');
+  if(chest.textContent==='🎁') return;
+  SFX.chest(); chest.textContent='🎁'; chest.classList.add('open');
+  confetti(20);
+  document.getElementById('leTap').style.display='none';
+
+  setTimeout(()=>{
+    const sr=document.getElementById('stickerReveal');
+    if(S.latestSticker) {
+      document.getElementById('nsEmoji').textContent=S.latestSticker.e;
+      document.getElementById('nsName').textContent=S.latestSticker.n;
+      sr.style.display='block';
+      SFX.unlock(); speak('Bé mở khóa được sticker mới rồi!');
+      confetti(25);
+    } else {
+      sr.style.display='block';
+      document.getElementById('nsEmoji').textContent='💝';
+      document.getElementById('nsName').textContent='Giữ tiếp nhé!';
+      speak('Bé đã có sticker này rồi! Chơi giỏi hơn nữa nhé!');
+    }
+  },600);
+}
+
+// Chơi lại cùng game
+function replayGame() {
+  SFX.click();
+  launchGame(S.lastGame||1);
+}
+
+/* ============================================================
+   MODULE 18: LAUNCH GAME & QUICK PLAY
+   ============================================================ */
+function launchGame(n) {
+  SFX.click();
+  S.curGame=n; S.lastGame=n;
+  startSessionTimer();
+  // Cập nhật avatar mascot trong tất cả game screens
+  ['g1','g2','g3','g4'].forEach(id=>setMascot(id,S.avatar));
+
+  if(n===1)     { initG1(); showScreen('game1Screen'); }
+  else if(n===2){ initG2(); showScreen('game2Screen'); }
+  else if(n===3){ initG3(); showScreen('game3Screen'); }
+  else if(n===4){ initG4(); showScreen('game4Screen'); }
+}
+
+function quickPlay() {
+  SFX.click();
+  const g=Math.floor(Math.random()*4)+1;
+  speak('Quick Play! Cùng thử game số '+g+' nhé!');
+  setTimeout(()=>launchGame(g),300);
+}
+
+/* ============================================================
+   MODULE 19: KHỞI ĐỘNG ỨNG DỤNG
+   ============================================================ */
+function buildAvatarGrid() {
+  const grid=document.getElementById('avatarGrid');
+  grid.innerHTML=AVATARS.map(a=>`
+    <div class="avatar-opt ${a===S.avatar?'sel':''}" onclick="pickAvatar('${a}')">${a}</div>
+  `).join('');
+}
+
+function pickAvatar(a) {
+  S.avatar=a;
+  document.querySelectorAll('.avatar-opt').forEach(el=>{
+    el.classList.toggle('sel',el.textContent===a);
+  });
+  document.getElementById('splashAvi').textContent=a;
+  SFX.click();
+}
+
+function startApp() {
+  const nm=document.getElementById('nameInput').value.trim();
+  S.name=nm||'Bé';
+  saveData(); SFX.click();
+
+  // Cập nhật header home
+  document.getElementById('hpName').textContent=S.name;
+  document.getElementById('hpAv').textContent=S.avatar;
+  document.getElementById('bgmBtn').textContent=S.bgm?'🎵':'🔕';
+  document.querySelectorAll('[onclick="toggleSFX()"]').forEach(b=>
+    b.textContent=S.sfx?'🔊':'🔇');
+
+  renderLevelTabs(); renderHomeStars(); renderCollection();
+  setMascot('home',S.avatar);
+  mascotSay('home','Xin chào '+S.name+'! 🎉 Cùng học vui nào!');
+  showScreen('homeScreen');
+  speak('Xin chào '+S.name+'! Cùng học vui nào!');
+  if(S.bgm) setTimeout(startBGM,800);
+}
+
+// Khởi chạy khi trang load
+window.addEventListener('load',()=>{
+  loadData();
+  buildAvatarGrid();
+  // Nếu đã có dữ liệu cũ → bỏ qua màn splash
+  if(S.name&&S.name!=='Bé') {
+    document.getElementById('nameInput').value=S.name;
+    // Cập nhật avatar grid
+    buildAvatarGrid();
+  }
+  document.getElementById('splashAvi').textContent=S.avatar;
+
+  // Đồng bộ nút âm thanh
+  document.querySelectorAll('[onclick="toggleSFX()"]').forEach(b=>
+    b.textContent=S.sfx?'🔊':'🔇');
+});
+
+// Lưu khi rời trang
+window.addEventListener('beforeunload', saveData);
+</script>
+</body>
+</html>
